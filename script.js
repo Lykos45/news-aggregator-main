@@ -16,12 +16,12 @@ const ConfigManager = (function() {
         return {
             theme: 'dark',
             apiUrl: 'https://newsapi.org/v2/top-headlines',
-            apiKey: '6c65445cbe274d0ab8a833fcdec68831', // TODO: Replace with your NewsAPI key
+            apiKey: '6c65445cbe274d0ab8a833fcdec68831', // ✅ Replaced with your API key
             country: 'us'
         };
     }
 
-    // TODO: Return getInstance function
+    // Return getInstance function
     return {
         getInstance: function() {
             if (!instance) {
@@ -34,17 +34,24 @@ const ConfigManager = (function() {
 
 // Module Pattern: NewsFetcher
 const NewsFetcher = (function () {
-    // TODO: Create config object with getInstance of ConfigManager
     const config = ConfigManager.getInstance();
 
+    // Using async/await with a CORS proxy for GitHub Pages compatibility
     async function fetchArticles() {
         try {
-            // TODO: return fetch data adjusted for only articles
-            const response = await fetch(`${config.apiUrl}?country=${config.country}&apiKey=${config.apiKey}`);
+            const proxyUrl = 'https://api.allorigins.win/get?url=';
+            const targetUrl = `${config.apiUrl}?country=${config.country}&apiKey=${config.apiKey}`;
+            const response = await fetch(`${proxyUrl}${encodeURIComponent(targetUrl)}`);
+
             if (!response.ok) {
                 throw new Error('Failed to fetch articles');
             }
-            const data = await response.json();
+
+            // Parse proxy response
+            const proxyData = await response.json();
+            const data = JSON.parse(proxyData.contents);
+
+            // Return articles safely
             return data.articles || [];
         } catch (error) {
             console.error('Error fetching news:', error);
@@ -63,7 +70,6 @@ function NewsFeed() {
     this.articles = [];
 }
 
-// TODO: Create NewsFeed prototype
 NewsFeed.prototype = {
     subscribe: function(fn) {
         this.observers.push(fn);
@@ -97,7 +103,7 @@ function updateArticleList(article) {
     articleListElement.appendChild(listItem);
 }
 
-// TODO: Subscribe Observers
+// Subscribe Observers
 newsFeed.subscribe(updateHeadline);
 newsFeed.subscribe(updateArticleList);
 
